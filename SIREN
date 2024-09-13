@@ -267,7 +267,7 @@ MinimizeButton.TextWrapped = true
 
 -- Scripts:
 
-local function LWTET_fake_script() -- Frame.LocalScript 
+local function AXDI_fake_script() -- Frame.LocalScript 
 	local script = Instance.new('LocalScript', Frame)
 
 	-- Referensi ke objek frame
@@ -304,8 +304,8 @@ local function LWTET_fake_script() -- Frame.LocalScript
 	frame.InputChanged:Connect(onInputChanged)
 	
 end
-coroutine.wrap(LWTET_fake_script)()
-local function VADLSZ_fake_script() -- ScreenGui.LocalScript 
+coroutine.wrap(AXDI_fake_script)()
+local function YKGU_fake_script() -- ScreenGui.LocalScript 
 	local script = Instance.new('LocalScript', ScreenGui)
 
 	local TweenService = game:GetService("TweenService")
@@ -346,15 +346,6 @@ local function VADLSZ_fake_script() -- ScreenGui.LocalScript
 		PAD3.ImageColor3 = Color3.fromRGB(200, 200, 200)
 		Circle4.Position = UDim2.new(0, 0, 0, 0)
 		AURA.ImageColor3 = Color3.fromRGB(200, 200, 200)
-		Button1.Active = true
-		Button2.Active = true
-		Button3.Active = true
-		Button4.Active = true
-		Button1.Visible = true
-		Button2.Visible = true
-		Button3.Visible = true
-		Button4.Visible = true
-		print("Initial state set")
 	end
 	
 	-- Fungsi untuk mengatur noclip
@@ -373,170 +364,97 @@ local function VADLSZ_fake_script() -- ScreenGui.LocalScript
 		local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 	
 		if targetCFrame then
-			-- Hitung jarak antara karakter dan target
-			local targetPosition = targetCFrame.Position + Vector3.new(0, 3, 0) -- 3 unit di atas target
-			local distance = (humanoidRootPart.Position - targetPosition).magnitude -- Menghitung jarak
+			local targetPosition = targetCFrame.Position + Vector3.new(0, 3, 0)
+			local distance = (humanoidRootPart.Position - targetPosition).magnitude
 	
-			-- Atur noclip sebelum tween
 			setNoclip(character, true)
-			print("Noclip diatur ke true.")
 	
-			-- Mengatur kecepatan tween berdasarkan jarak
-			local tweenSpeed
-			if distance < 250 then
-				tweenSpeed = 600
-			elseif distance > 1000 then
-				tweenSpeed = 200
-			else
-				tweenSpeed = distance / 5 -- Kecepatan default antara 250 dan 1000
-			end
-	
-			-- Durasi tween berdasarkan kecepatan
+			local tweenSpeed = (distance < 250) and 600 or (distance > 1000) and 200 or distance / 5
 			local tweenDuration = distance / tweenSpeed
 	
-			-- Tween untuk bergerak ke posisi target
 			local tweenInfo = TweenInfo.new(tweenDuration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-	
-			-- Tween CFrame untuk humanoidRootPart
 			local tween = TweenService:Create(humanoidRootPart, tweenInfo, { CFrame = targetCFrame })
 	
-			-- Mainkan tween
 			tween:Play()
-			print("Tween dimulai ke posisi:", targetCFrame)
-	
-			-- Tunggu hingga tween selesai
 			tween.Completed:Wait()
-			print("Tween selesai.")
 	
-			-- Setelah tween selesai, pastikan posisi karakter di atas target
 			humanoidRootPart.CFrame = targetCFrame
-	
-			-- Kembalikan noclip setelah teleportasi selesai
 			setNoclip(character, false)
-			print("Noclip diatur ke false.")
 		else
-			print("Target CFrame tidak ditemukan")
+			warn("Target CFrame tidak ditemukan")
 		end
 	end
 	
-	-- Fungsi untuk toggle PAD1
-	local function togglePAD1()
-		isPAD1On = not isPAD1On
-		if isPAD1On then
-			Circle1.Position = UDim2.new(0.629, 0, 0, 0) -- Geser tombol ke kiri
-			PAD1.ImageColor3 = Color3.fromRGB(53, 255, 110) -- Ganti warna ke hijau
-			print("PAD 1 is ON")
-	
-			-- Teleport player ketika PAD1 diaktifkan
-			local targetCFrame = CFrame.new(-5018.04932, 318.081726, -2912.26807, 0.927278221, 0, 0.374373019, 0, 1, 0, -0.374372959, 0, 0.927278221)
+	-- Fungsi toggle generik untuk PAD
+	local function togglePAD(PAD, Circle, isPADOn, targetCFrame)
+		isPADOn = not isPADOn
+		if isPADOn then
+			Circle.Position = UDim2.new(0.629, 0, 0, 0)
+			PAD.ImageColor3 = Color3.fromRGB(53, 255, 110)
 			teleport(targetCFrame)
 		else
-			Circle1.Position = UDim2.new(0, 0, 0, 0) -- Geser tombol ke kanan
-			PAD1.ImageColor3 = Color3.fromRGB(200, 200, 200) -- Ganti warna ke abu-abu
-			print("PAD 1 is OFF")
+			Circle.Position = UDim2.new(0, 0, 0, 0)
+			PAD.ImageColor3 = Color3.fromRGB(200, 200, 200)
 		end
-	end
-	
-	-- Fungsi toggle lainnya
-	local function togglePAD2()
-		isPAD2On = not isPAD2On
-		if isPAD2On then
-			Circle2.Position = UDim2.new(0.629, 0, 0, 0)
-			PAD2.ImageColor3 = Color3.fromRGB(53, 255, 110)
-			print("PAD 2 is ON")
-	
-			-- Teleport player ketika PAD2 diaktifkan
-			local targetCFrame = CFrame.new(-5003.35547, 318.081726, -2875.87671, 0.927278221, 0, 0.374372959, 0, 1, 0, -0.374372959, 0, 0.927278221)
-			teleport(targetCFrame)
-		else
-			Circle2.Position = UDim2.new(0, 0, 0, 0)
-			PAD2.ImageColor3 = Color3.fromRGB(200, 200, 200)
-			print("PAD 2 is OFF")
-		end
-	end
-	
-	local function togglePAD3()
-		isPAD3On = not isPAD3On
-		if isPAD3On then
-			Circle3.Position = UDim2.new(0.629, 0, 0, 0)
-			PAD3.ImageColor3 = Color3.fromRGB(53, 255, 110)
-			print("PAD 3 is ON")
-	
-			-- Teleport player ketika PAD3 diaktifkan
-			local targetCFrame = CFrame.new(-4988.50342, 318.081726, -2839.09277, 0.927278221, 0, 0.374372959, 0, 1, 0, -0.374372959, 0, 0.927278221)
-			teleport(targetCFrame)
-		else
-			Circle3.Position = UDim2.new(0, 0, 0, 0)
-			PAD3.ImageColor3 = Color3.fromRGB(200, 200, 200)
-			print("PAD 3 is OFF")
-		end
+		return isPADOn
 	end
 	
 	-- Fungsi untuk toggle AURA
 	local function toggleAURA()
 		isAURAOn = not isAURAOn
-		_G.Kill_Aura = isAURAOn -- Aktifkan atau nonaktifkan Kill_Aura
+		_G.Kill_Aura = isAURAOn
+	
 		if isAURAOn then
 			Circle4.Position = UDim2.new(0.629, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(53, 255, 110)
-			print("AURA is ON")
 	
-			-- Jalankan fungsi untuk membunuh musuh di sekitar
+			-- Jalankan fungsi untuk Kill Aura
 			spawn(function()
-				while isAURAOn and _G.Kill_Aura do -- Pastikan loop berhenti ketika toggle dimatikan
-					local player = game.Players.LocalPlayer
-					local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-					if humanoidRootPart then
-						local enemies = game.Workspace:GetChildren()
-						for _, enemy in ipairs(enemies) do
-							if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
-								local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).magnitude
-								if distance <= 20 then -- Jarak aura, ubah sesuai kebutuhan
-									enemy.Humanoid.Health = 0 -- Bunuh musuh
-								end
-							end
+				while _G.Kill_Aura do
+					wait(0.5)
+					for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+						local humanoid = enemy:FindFirstChild("Humanoid")
+						local humanoidRootPart = enemy:FindFirstChild("HumanoidRootPart")
+	
+						if humanoid and humanoidRootPart and humanoid.Health > 0 then
+							pcall(function()
+								humanoid.Health = 0
+								humanoidRootPart.CanCollide = false
+							end)
 						end
 					end
-					wait(0.1) -- Kurangi delay untuk respon lebih cepat
 				end
 			end)
 		else
 			Circle4.Position = UDim2.new(0, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(200, 200, 200)
-			print("AURA is OFF")
 		end
 	end
 	
 	-- Fungsi untuk toggle minimize frame
 	local function toggleMinimize()
-		if isMinimized then
-			Frame.Visible = true
-			PAD1.Visible = true
-			PAD2.Visible = true
-			PAD3.Visible = true
-			AURA.Visible = true
-			isMinimized = false
-			print("Frame maximized")
-		else
-			Frame.Visible = false
-			isMinimized = true
-			print("Frame minimized")
-		end
+		isMinimized = not isMinimized
+		Frame.Visible = not isMinimized
 	end
 	
 	-- Set tampilan awal
 	setInitialState()
 	
 	-- Event listener untuk setiap tombol PAD
-	Button1.MouseButton1Click:Connect(togglePAD1)
-	Button2.MouseButton1Click:Connect(togglePAD2)
-	Button3.MouseButton1Click:Connect(togglePAD3)
-	Button4.MouseButton1Click:Connect(function()
-		print("AURA button clicked")
-		toggleAURA()
+	Button1.MouseButton1Click:Connect(function()
+		isPAD1On = togglePAD(PAD1, Circle1, isPAD1On, CFrame.new(-5018.04932, 318.081726, -2912.26807))
 	end)
 	
+	Button2.MouseButton1Click:Connect(function()
+		isPAD2On = togglePAD(PAD2, Circle2, isPAD2On, CFrame.new(-5003.35547, 318.081726, -2875.87671))
+	end)
+	
+	Button3.MouseButton1Click:Connect(function()
+		isPAD3On = togglePAD(PAD3, Circle3, isPAD3On, CFrame.new(-4988.50342, 318.081726, -2839.09277))
+	end)
+	
+	Button4.MouseButton1Click:Connect(toggleAURA)
 	MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
 	
 end
-coroutine.wrap(VADLSZ_fake_script)()
+coroutine.wrap(YKGU_fake_script)()
