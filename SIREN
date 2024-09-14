@@ -267,7 +267,7 @@ MinimizeButton.TextWrapped = true
 
 -- Scripts:
 
-local function AXDI_fake_script() -- Frame.LocalScript 
+local function PZZQEAG_fake_script() -- Frame.LocalScript 
 	local script = Instance.new('LocalScript', Frame)
 
 	-- Referensi ke objek frame
@@ -304,8 +304,8 @@ local function AXDI_fake_script() -- Frame.LocalScript
 	frame.InputChanged:Connect(onInputChanged)
 	
 end
-coroutine.wrap(AXDI_fake_script)()
-local function YKGU_fake_script() -- ScreenGui.LocalScript 
+coroutine.wrap(PZZQEAG_fake_script)()
+local function DEHGS_fake_script() -- ScreenGui.LocalScript 
 	local script = Instance.new('LocalScript', ScreenGui)
 
 	local TweenService = game:GetService("TweenService")
@@ -333,6 +333,8 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 	local isPAD3On = false
 	local isAURAOn = false
 	local isMinimized = false
+	local isTeleporting = false -- Track ongoing teleportation
+	local auraCoroutine
 	
 	_G.Kill_Aura = false -- Inisialisasi Kill_Aura
 	
@@ -359,6 +361,9 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 	
 	-- Fungsi untuk teleportasi
 	local function teleport(targetCFrame)
+		if isTeleporting then return end -- Prevent teleport if one is in progress
+		isTeleporting = true
+	
 		local player = game.Players.LocalPlayer
 		local character = player.Character or player.CharacterAdded:Wait()
 		local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
@@ -378,10 +383,11 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 			tween:Play()
 			tween.Completed:Wait()
 	
-			humanoidRootPart.CFrame = targetCFrame
 			setNoclip(character, false)
+			isTeleporting = false -- Mark teleport as complete
 		else
 			warn("Target CFrame tidak ditemukan")
+			isTeleporting = false
 		end
 	end
 	
@@ -399,6 +405,11 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 		return isPADOn
 	end
 	
+	-- Fungsi untuk memeriksa jika musuh berada dalam jarak tertentu
+	local function isWithinRange(enemyPosition, playerPosition, range)
+		return (enemyPosition - playerPosition).Magnitude <= range
+	end
+	
 	-- Fungsi untuk toggle AURA
 	local function toggleAURA()
 		isAURAOn = not isAURAOn
@@ -408,23 +419,27 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 			Circle4.Position = UDim2.new(0.629, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(53, 255, 110)
 	
-			-- Jalankan fungsi untuk Kill Aura
-			spawn(function()
+			-- Run Kill Aura logic using coroutine for better control
+			auraCoroutine = coroutine.wrap(function()
 				while _G.Kill_Aura do
 					wait(0.5)
+					local playerPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
 					for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
 						local humanoid = enemy:FindFirstChild("Humanoid")
 						local humanoidRootPart = enemy:FindFirstChild("HumanoidRootPart")
 	
 						if humanoid and humanoidRootPart and humanoid.Health > 0 then
-							pcall(function()
-								humanoid.Health = 0
-								humanoidRootPart.CanCollide = false
-							end)
+							if isWithinRange(humanoidRootPart.Position, playerPosition, 50) then
+								pcall(function()
+									humanoid.Health = 0
+									humanoidRootPart.CanCollide = false
+								end)
+							end
 						end
 					end
 				end
 			end)
+			auraCoroutine()
 		else
 			Circle4.Position = UDim2.new(0, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(200, 200, 200)
@@ -457,4 +472,4 @@ local function YKGU_fake_script() -- ScreenGui.LocalScript
 	MinimizeButton.MouseButton1Click:Connect(toggleMinimize)
 	
 end
-coroutine.wrap(YKGU_fake_script)()
+coroutine.wrap(DEHGS_fake_script)()
