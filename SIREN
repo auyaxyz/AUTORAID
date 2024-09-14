@@ -419,29 +419,30 @@ local function DEHGS_fake_script() -- ScreenGui.LocalScript
 			Circle4.Position = UDim2.new(0.629, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(53, 255, 110)
 	
-			-- Jalankan fungsi untuk membunuh musuh di sekitar
-			spawn(function()
-				while isAURAOn and _G.Kill_Aura do -- Pastikan loop berhenti ketika toggle dimatikan
-					local player = game.Players.LocalPlayer
-					local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-					if humanoidRootPart then
-						local enemies = game.Workspace:GetChildren()
-						for _, enemy in ipairs(enemies) do
-							if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy:FindFirstChild("HumanoidRootPart") then
-								local distance = (humanoidRootPart.Position - enemy.HumanoidRootPart.Position).magnitude
-								if distance <= 20 then -- Jarak aura, ubah sesuai kebutuhan
-									enemy.Humanoid.Health = 0 -- Bunuh musuh
-								end
+			-- Run Kill Aura logic using coroutine for better control
+			auraCoroutine = coroutine.wrap(function()
+				while _G.Kill_Aura do
+					wait(0.5)
+					local playerPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+					for _, enemy in pairs(game.Workspace.Enemies:GetChildren()) do
+						local humanoid = enemy:FindFirstChild("Humanoid")
+						local humanoidRootPart = enemy:FindFirstChild("HumanoidRootPart")
+	
+						if humanoid and humanoidRootPart and humanoid.Health > 0 then
+							if isWithinRange(humanoidRootPart.Position, playerPosition, 250) then
+								pcall(function()
+									humanoid.Health = 0
+									humanoidRootPart.CanCollide = false
+								end)
 							end
 						end
 					end
-					wait(0.1) -- Kurangi delay untuk respon lebih cepat
 				end
 			end)
+			auraCoroutine()
 		else
 			Circle4.Position = UDim2.new(0, 0, 0, 0)
 			AURA.ImageColor3 = Color3.fromRGB(200, 200, 200)
-			print("AURA is OFF")
 		end
 	end
 	
